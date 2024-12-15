@@ -1,7 +1,8 @@
 import sqlite3
 import os
 from dotenv import load_dotenv
-from telegram import Update, ReplyKeyboardRemove
+from datetime import date
+from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ConversationHandler, ContextTypes
 
 # Load environment variables from .env file
@@ -9,7 +10,7 @@ load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
 # Define conversation states
-ASK_DATE, ASK_WEIGHT = range(2)
+CHOOSE_DATE_OPTION, ASK_DATE, ASK_WEIGHT = range(3)
 
 # Database setup
 def setup_database():
@@ -40,15 +41,47 @@ def store_data(user_id, username, date, weight):
 
 # Start command
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    # Provide options for using today's date or entering another date
+    reply_keyboard = [["Today", "Another Day"]]
     await update.message.reply_text(
-        "Hello! I need some information. Please enter the date (in YYYY-MM-DD format):"
+        "Do you want to use today's date or enter another date?",
+        reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
     )
-    return ASK_DATE
+    return CHOOSE_DATE_OPTION
 
-# Handle date input
+# Handle date choice
+async def choose_date_option(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    choice = update.message.text
+
+    if choice == "Today":
+        # Use today's date
+        today_date = date.today().isoformat()
+        context.user_data['date'] = today_date
+        await update.message.reply_text(
+            f"Using today's date: {today_date}.\n\nNow, please enter your weight (in kilograms):",
+            reply_markup=ReplyKeyboardRemove()
+        )
+        return ASK_WEIGHT
+    elif choice == "Another Day":
+        # Ask the user to enter a date manually
+        await update.message.reply_text(
+            "Please enter the date (in YYYY-MM-DD format):",
+            reply_markup=ReplyKeyboardRemove()
+        )
+        return ASK_DATE
+    else:
+        # Handle unexpected input
+        reply_keyboard = [["Today", "Another Day"]]
+        await update.message.reply_text(
+            "Invalid choice. Please choose 'Today' or 'Another Day'.",
+            reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
+        )
+        return CHOOSE_DATE_OPTION
+
+# Handle manual date input
 async def ask_date(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    date = update.message.text
-    context.user_data['date'] = date  # Store the date in user data
+    user_date = update.message.text
+    context.user_data['date'] = user_date  # Store the date in user data
     await update.message.reply_text("Thank you! Now, please enter your weight (in kilograms):")
     return ASK_WEIGHT
 
@@ -109,6 +142,7 @@ def main():
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
         states={
+            CHOOSE_DATE_OPTION: [MessageHandler(filters.TEXT & ~filters.COMMAND, choose_date_option)],
             ASK_DATE: [MessageHandler(filters.TEXT & ~filters.COMMAND, ask_date)],
             ASK_WEIGHT: [MessageHandler(filters.TEXT & ~filters.COMMAND, ask_weight)],
         },
