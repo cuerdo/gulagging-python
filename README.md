@@ -1,7 +1,3 @@
-Here’s a `README.md` file for your project:
-
----
-
 # Telegram Weight Tracker Bot and Web Dashboard
 
 This project combines a Telegram bot and a web dashboard to help users track their weight over time. Users can interact with the bot to log their weight and view their historical data. The web dashboard provides a comprehensive view of all user data and includes a dynamic graph to visualize weight changes over time.
