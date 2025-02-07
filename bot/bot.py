@@ -14,7 +14,7 @@ CHOOSE_DATE_OPTION, ASK_DATE, ASK_WEIGHT = range(3)
 
 # Database setup
 def setup_database():
-    connection = sqlite3.connect("user_data.db")
+    connection = sqlite3.connect("db/user_data.db")
     cursor = connection.cursor()
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS user_info (
@@ -30,7 +30,7 @@ def setup_database():
 
 # Store data in the database
 def store_data(user_id, username, date, weight):
-    connection = sqlite3.connect("user_data.db")
+    connection = sqlite3.connect("db/user_data.db")
     cursor = connection.cursor()
     cursor.execute(
         "INSERT INTO user_info (user_id, username, date, weight) VALUES (?, ?, ?, ?)",

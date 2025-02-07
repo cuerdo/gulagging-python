@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 # Function to retrieve all data or filter by user_id
 def get_all_data(user_id=None):
-    connection = sqlite3.connect("user_data.db")
+    connection = sqlite3.connect("db/user_data.db")
     cursor = connection.cursor()
     
     # Query to retrieve all data or filter by user_id
@@ -25,7 +25,7 @@ def get_all_data(user_id=None):
 
 # Function to retrieve weight data for graphing
 def get_weight_data(user_id):
-    connection = sqlite3.connect("user_data.db")
+    connection = sqlite3.connect("db/user_data.db")
     cursor = connection.cursor()
     cursor.execute("SELECT date, weight FROM user_info WHERE user_id = ? ORDER BY date", (user_id,))
     rows = cursor.fetchall()

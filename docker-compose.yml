@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  telegram-bot:
+    build: ./bot  # Path to your Telegram bot's Dockerfile
+    container_name: gulag-bot
+    volumes:
+      - shared-db-data:/bot/db/  # Mount the shared SQLite database
+    depends_on:
+      - flask-web
+    environment:
+      - FLASK_ENV=development
+    networks:
+      - app-network
+
+  flask-web:
+    build: ./web  # Path to your Flask app's Dockerfile
+    container_name: gulag-web
+    ports:
+      - "5000:5000"  # Expose Flask app on port 5000
+    volumes:
+      - shared-db-data:/app/db/  # Mount the shared SQLite database
+    environment:
+      - FLASK_ENV=development
+    networks:
+      - app-network
+
+volumes:
+  shared-db-data:  # Shared volume for the SQLite database
+
+networks:
+  app-network:  # Shared network for communication between services
+  
