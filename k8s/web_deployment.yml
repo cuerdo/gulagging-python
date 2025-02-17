@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flask
+  template:
+    metadata:
+      labels:
+        app: flask
+    spec:
+      volumes:
+        - name: sqlite-storage
+          persistentVolumeClaim:
+            claimName: sqlite-pvc
+      containers:
+        - name: flask-container
+          image: myrepo/flask-app:latest
+          ports:
+            - containerPort: 5000
+          volumeMounts:
+            - mountPath: "/app/database"
+              name: sqlite-storage
