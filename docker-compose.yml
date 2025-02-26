@@ -24,6 +24,16 @@ services:
       - FLASK_ENV=development
     networks:
       - app-network
+    
+  sqlite-web:
+    image: coleifer/sqlite-web
+    container_name: sqlite-web
+    volumes:
+      - shared-db-data:/data  # Mount the shared SQLite database volume
+    ports:
+      - "8080:8080"  # Expose SQLite Web UI on port 8080
+    networks:
+      - app-network
 
 volumes:
   shared-db-data:  # Shared volume for the SQLite database
